@@ -34,12 +34,12 @@ class ResaWodCommand extends Command
         'time' => '12:30',
       ],
       'saturday' => [
-        'day' => 'thursday',
-        'time' => '07:00',
-      ],
-      'monday' => [
         'day' => 'friday',
         'time' => '12:30',
+      ],
+      'monday' => [
+        'day' => 'thursday',
+        'time' => '07:00',
       ],
       'tuesday' => [
         'day' => 'saturday',
