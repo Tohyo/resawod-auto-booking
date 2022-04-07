@@ -2,7 +2,7 @@
 
 namespace App\Client;
 
-use App\Exception\ActivityNotFound;
+use App\Exception\ActivityNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -34,7 +34,7 @@ class ResaWodClient
       }
     }
 
-    throw new ActivityNotFound();
+    throw new ActivityNotFoundException();
   }
 
   public function book($activityId)
