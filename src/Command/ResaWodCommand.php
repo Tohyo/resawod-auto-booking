@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Client\ResaWodClient;
-use App\Exception\ActivityNotFound;
+use App\Exception\ActivityNotFoundException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -53,7 +53,7 @@ class ResaWodCommand extends Command
       $toBook = $bookingConfiguration[$currentDay];
       try {
         $activity = $this->resaWodClient->getActivity($toBook['day'], $toBook['time']);
-      } catch (ActivityNotFound $e) {
+      } catch (ActivityNotFoundException $e) {
         return Command::FAILURE;
       }
   

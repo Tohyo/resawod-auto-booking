@@ -4,5 +4,5 @@ namespace App\Exception;
 
 use Exception;
 
-class ActivityNotFound extends Exception
+class ActivityNotFoundException extends Exception
 {}
