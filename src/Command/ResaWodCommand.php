@@ -56,8 +56,8 @@ class ResaWodCommand extends Command
       } catch (ActivityNotFoundException $e) {
         return Command::FAILURE;
       }
-  
-      $this->resaWodClient->book($activity->id_activity_calendar);
+
+     $this->resaWodClient->book($activity->id_activity_calendar);
     }
     
     return Command::SUCCESS;
