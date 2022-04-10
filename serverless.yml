@@ -1,5 +1,5 @@
 # Read the documentation at https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/
-service: symfony
+service: Resa-wod
 
 provider:
   name: aws
@@ -25,7 +25,7 @@ functions:
       - ${bref:layer.console} # The "console" layer
     events:
       - schedule:
-          rate: cron(0 22 * * ? *)
+          rate: cron(0 14 * * ? *)
           input: '"app:resa-wod"'
 
 package:
