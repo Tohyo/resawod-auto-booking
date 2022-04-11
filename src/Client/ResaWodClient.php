@@ -3,6 +3,7 @@
 namespace App\Client;
 
 use App\Exception\ActivityNotFoundException;
+use stdClass;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -12,8 +13,35 @@ class ResaWodClient
     private HttpClientInterface $client,
     private ContainerBagInterface $params
   ) {}
+
+  public function getSessionId(): string
+  {
+    $response = $this->client->request(
+      'GET',
+      'https://sport.nubapp.com/web/ajax/getApplication.php?id_application='. $this->params->get('app.application_id'),
+    );
+
+    return (preg_split('/=|;/', $response->getHeaders()['set-cookie'][0]))[1];
+  }
+
+  public function login(string $sessionId): void
+  {
+    $this->client->request(
+      'POST',
+      'https://sport.nubapp.com/web/ajax/users/checkUser.php',
+      [
+        'body' => [
+          'username' => $this->params->get('app.username'),
+          'password' => $this->params->get('app.password'),
+        ],
+        'headers' => [
+          'cookie' => 'applicationId=' . $this->params->get('app.application_id') . '; PHPSESSID-FRONT=' . $sessionId
+        ]
+      ]
+    );
+  }
   
-  public function getActivity($day, $startTime)
+  public function getActivity(string $day, string $startTime, string $sessionId): stdClass
   {
     $startDay = strtotime('next ' . $day);
     $endDay = strtotime('+1 day', $startDay);
@@ -23,7 +51,7 @@ class ResaWodClient
       'https://sport.nubapp.com/web/ajax/activities/getActivitiesCalendar.php?id_category_activity=451&start=' . $startDay . '&end=' . $endDay,
       [
         'headers' => [
-          'cookie' => 'applicationId=' . $this->params->get('app.application_id') . '; PHPSESSID-FRONT=' . $this->params->get('app.session_id')
+          'cookie' => 'applicationId=' . $this->params->get('app.application_id') . '; PHPSESSID-FRONT=' . $sessionId
         ]
       ]
     );
@@ -37,9 +65,9 @@ class ResaWodClient
     throw new ActivityNotFoundException();
   }
 
-  public function book($activityId)
+  public function book(string $activityId, string $sessionId): void
   {
-    return $this->client->request(
+    $this->client->request(
       'POST',
       'https://sport.nubapp.com/web/ajax/bookings/bookBookings.php',
       [
@@ -59,7 +87,7 @@ class ResaWodClient
           'formIntoNotes' => '',
         ],
         'headers' => [
-          'cookie' => 'applicationId='. $this->params->get('app.application_id') . '; PHPSESSID-FRONT=' . $this->params->get('app.session_id') . '; PHPSESSID-BACK=' . $this->params->get('app.back_id')
+          'cookie' => 'applicationId='. $this->params->get('app.application_id') . '; PHPSESSID-FRONT=' . $sessionId
         ]
       ]
     );
