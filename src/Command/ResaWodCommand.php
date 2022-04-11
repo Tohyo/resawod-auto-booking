@@ -51,13 +51,16 @@ class ResaWodCommand extends Command
 
     if (isset($bookingConfiguration[$currentDay])) {
       $toBook = $bookingConfiguration[$currentDay];
+      $sessionId = $this->resaWodClient->getSessionId();
+      $this->resaWodClient->login($sessionId);
+
       try {
-        $activity = $this->resaWodClient->getActivity($toBook['day'], $toBook['time']);
+        $activity = $this->resaWodClient->getActivity($toBook['day'], $toBook['time'], $sessionId);
       } catch (ActivityNotFoundException $e) {
         return Command::FAILURE;
       }
 
-     $this->resaWodClient->book($activity->id_activity_calendar);
+      $this->resaWodClient->book($activity->id_activity_calendar, $sessionId);
     }
     
     return Command::SUCCESS;

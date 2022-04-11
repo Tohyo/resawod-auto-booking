@@ -5,8 +5,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
   app.application_id: "%env(APPLICATION_ID)%"
-  app.session_id: "%env(SESSION_ID)%"
-  app.back_id: "%env(BACK_ID)%"
+  app.username: "%env(APPLICATION_USERNAME)%"
+  app.password: "%env(APPLICATION_PASSWORD)%"
 services:
   # default configuration for services in *this* file
   _defaults:
