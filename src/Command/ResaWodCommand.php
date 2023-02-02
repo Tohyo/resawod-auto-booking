@@ -4,10 +4,12 @@ namespace App\Command;
 
 use App\Client\ResaWodClient;
 use App\Exception\ActivityNotFoundException;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'app:resa-wod')]
 class ResaWodCommand extends Command
 {
   public function __construct(
@@ -15,8 +17,6 @@ class ResaWodCommand extends Command
   ) {
     parent::__construct();
   }
-
-  protected static $defaultName = 'app:resa-wod';
 
   protected function execute(InputInterface $input, OutputInterface $output): int
   {
@@ -27,7 +27,7 @@ class ResaWodCommand extends Command
       ],
       'thursday' => [
         'day' => 'tuesday',
-        'time' => '12:30',
+        'time' => '07:00',
       ],
       'friday' => [
         'day' => 'wednesday',
@@ -49,20 +49,18 @@ class ResaWodCommand extends Command
 
     $currentDay = strtolower(date('l'));
 
-    if (isset($bookingConfiguration[$currentDay])) {
-      $toBook = $bookingConfiguration[$currentDay];
-      $sessionId = $this->resaWodClient->getSessionId();
-      $this->resaWodClient->login($sessionId);
-
-      try {
-        $activity = $this->resaWodClient->getActivity($toBook['day'], $toBook['time'], $sessionId);
-      } catch (ActivityNotFoundException $e) {
-        return Command::FAILURE;
-      }
-
-      $this->resaWodClient->book($activity->id_activity_calendar, $sessionId);
+    if (!isset($bookingConfiguration[$currentDay])) {
+      return Command::SUCCESS;
     }
-    
+
+    $toBook = $bookingConfiguration[$currentDay];
+
+    try {
+      $this->resaWodClient->book($toBook['day'], $toBook['time']);
+    } catch (ActivityNotFoundException $e) {
+      return Command::FAILURE;
+    }
+
     return Command::SUCCESS;
   }
 }

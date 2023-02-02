@@ -14,7 +14,40 @@ class ResaWodClient
     private ContainerBagInterface $params
   ) {}
 
-  public function getSessionId(): string
+  public function book(string $day, string $startTime): void
+  {
+    $sessionId = $this->getSessionId();
+    $this->login($sessionId);
+
+    $activity = $this->getActivity($day, $startTime, $sessionId);
+
+    $this->client->request(
+      'POST',
+      'https://sport.nubapp.com/web/ajax/bookings/bookBookings.php',
+      [
+        'body' => [
+          'items' => [
+            'activities' => [
+              0 => [
+                'id_activity_calendar' => $activity->id_activity_calendar,
+                'unit_price' => '0',
+                'n_guests' => '0',
+                'id_resource' => 'false' 
+              ]
+            ]
+          ],
+          'discount_code' => 'false',
+          'form' => '',
+          'formIntoNotes' => '',
+        ],
+        'headers' => [
+          'cookie' => 'applicationId='. $this->params->get('app.application_id') . '; PHPSESSID-FRONT=' . $sessionId
+        ]
+      ]
+    );
+  }
+
+  private function getSessionId(): string
   {
     $response = $this->client->request(
       'GET',
@@ -24,7 +57,7 @@ class ResaWodClient
     return (preg_split('/=|;/', $response->getHeaders()['set-cookie'][0]))[1];
   }
 
-  public function login(string $sessionId): void
+  private function login(string $sessionId): void
   {
     $this->client->request(
       'POST',
@@ -41,7 +74,7 @@ class ResaWodClient
     );
   }
   
-  public function getActivity(string $day, string $startTime, string $sessionId): stdClass
+  private function getActivity(string $day, string $startTime, string $sessionId): stdClass
   {
     $startDay = strtotime('next ' . $day);
     $endDay = strtotime('+1 day', $startDay);
@@ -63,33 +96,5 @@ class ResaWodClient
     }
 
     throw new ActivityNotFoundException();
-  }
-
-  public function book(string $activityId, string $sessionId): void
-  {
-    $this->client->request(
-      'POST',
-      'https://sport.nubapp.com/web/ajax/bookings/bookBookings.php',
-      [
-        'body' => [
-          'items' => [
-            'activities' => [
-              0 => [
-                'id_activity_calendar' => $activityId,
-                'unit_price' => '0',
-                'n_guests' => '0',
-                'id_resource' => 'false' 
-              ]
-            ]
-          ],
-          'discount_code' => 'false',
-          'form' => '',
-          'formIntoNotes' => '',
-        ],
-        'headers' => [
-          'cookie' => 'applicationId='. $this->params->get('app.application_id') . '; PHPSESSID-FRONT=' . $sessionId
-        ]
-      ]
-    );
   }
 }
